@@ -1,10 +1,30 @@
-import type { Slide } from "@/lib/markdown-parser"
+import type { Slide, ContentElement } from "@/lib/markdown-parser"
 
 interface SlideViewerProps {
   slide: Slide
   currentSlide: number
   totalSlides: number
   presentationTitle?: string
+}
+
+function renderContentElements(elements: ContentElement[]) {
+  return elements.map((element, index) => {
+    if (element.type === 'link') {
+      return (
+        <a
+          key={index}
+          href={element.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary hover:text-primary/80 underline underline-offset-4 transition-colors duration-200"
+        >
+          {element.text}
+        </a>
+      )
+    } else {
+      return <span key={index}>{element.text}</span>
+    }
+  })
 }
 
 export function SlideViewer({ slide, currentSlide, totalSlides, presentationTitle }: SlideViewerProps) {
@@ -59,14 +79,16 @@ export function SlideViewer({ slide, currentSlide, totalSlides, presentationTitl
 
             {/* Bullet Points - Left Aligned */}
             <div className="space-y-8 max-w-4xl mx-auto">
-              {slide.content.map((point, index) => (
+              {slide.content.map((contentElements, index) => (
                 <div key={index} className="flex items-start group">
                   <div className="text-xl md:text-2xl text-card-foreground leading-relaxed flex items-start gap-6">
                     <div className="relative flex-shrink-0 mt-2">
                       <div className="w-3 h-3 bg-gradient-to-r from-primary to-accent rounded-full group-hover:scale-110 transition-transform duration-200" />
                       <div className="absolute inset-0 w-3 h-3 bg-gradient-to-r from-primary to-accent rounded-full animate-pulse opacity-30" />
                     </div>
-                    <span className="text-pretty font-medium text-left">{point}</span>
+                    <span className="text-pretty font-medium text-left">
+                      {renderContentElements(contentElements)}
+                    </span>
                   </div>
                 </div>
               ))}

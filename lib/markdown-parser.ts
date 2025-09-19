@@ -1,13 +1,67 @@
+export interface LinkElement {
+  type: 'link'
+  text: string
+  url: string
+}
+
+export interface TextElement {
+  type: 'text'
+  text: string
+}
+
+export type ContentElement = LinkElement | TextElement
+
 export interface Slide {
   id: number
   title: string
-  content: string[]
+  content: ContentElement[][]
 }
 
 export interface SlideData {
   slides: Slide[]
   totalSlides: number
   presentationTitle?: string
+}
+
+function parseMarkdownLinks(text: string): ContentElement[] {
+  const elements: ContentElement[] = []
+  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g
+  let lastIndex = 0
+  let match
+
+  while ((match = linkRegex.exec(text)) !== null) {
+    // Add text before the link (preserve spaces, but only trim if it's empty)
+    if (match.index > lastIndex) {
+      const beforeText = text.substring(lastIndex, match.index)
+      if (beforeText.trim()) {
+        elements.push({ type: 'text', text: beforeText })
+      }
+    }
+
+    // Add the link
+    elements.push({
+      type: 'link',
+      text: match[1],
+      url: match[2]
+    })
+
+    lastIndex = match.index + match[0].length
+  }
+
+  // Add remaining text after the last link (preserve spaces, but only trim if it's empty)
+  if (lastIndex < text.length) {
+    const remainingText = text.substring(lastIndex)
+    if (remainingText.trim()) {
+      elements.push({ type: 'text', text: remainingText })
+    }
+  }
+
+  // If no links were found, return the entire text as a single text element
+  if (elements.length === 0) {
+    elements.push({ type: 'text', text: text })
+  }
+
+  return elements
 }
 
 export function parseMarkdownToSlides(markdownContent: string): SlideData {
@@ -60,7 +114,8 @@ export function parseMarkdownToSlides(markdownContent: string): SlideData {
     else if (currentSlide && (trimmedLine.startsWith("- ") || trimmedLine.startsWith("* "))) {
       const bulletContent = trimmedLine.substring(2).trim()
       if (bulletContent) {
-        currentSlide.content.push(bulletContent)
+        const parsedContent = parseMarkdownLinks(bulletContent)
+        currentSlide.content.push(parsedContent)
       }
     }
   }
@@ -94,8 +149,8 @@ export async function loadSlidesFromFile(): Promise<SlideData> {
           id: 1,
           title: "Error Loading Slides",
           content: [
-            "Could not load slides-presentation-input.md",
-            "Please check if the file exists in the public directory",
+            [{ type: 'text', text: "Could not load slides-presentation-input.md" }],
+            [{ type: 'text', text: "Please check if the file exists in the public directory" }],
           ],
         },
       ],
