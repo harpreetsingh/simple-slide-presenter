@@ -4,7 +4,7 @@
 - A structured approach to building apps with AI assistance
 - Transform ideas into working applications through collaborative workflows
 - Transform Vibe Coding from ad hoc prompts to a structured approach
-- The wisdom gleaned from 10,000 Reddit posts by the Spec Story folks
+- The wisdom gleaned from [10,000 Reddit posts](https://www.specflow.com/reddit-wisdom/) by the [SpecStory team](https://specstory.com/)
 
 ## Vibe Coding with Structured Approach
 - Collaboration workflow that breaks complex projects into digestible phases
